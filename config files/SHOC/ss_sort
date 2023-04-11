@@ -1,0 +1,17 @@
+partition,cyclic,a,8192,4,1
+partition,cyclic,b,8192,4,1
+partition,cyclic,bucket,8193,4,1
+partition,cyclic,sum,512,4,1
+
+unrolling,local_scan,loop1_outer,1
+unrolling,local_scan,loop1_inner,1
+unrolling,sum_scan,loop2,1
+unrolling,last_step_scan,loop3_outer,1
+unrolling,last_step_scan,loop3_inner,1
+unrolling,init,loop1_outer,1
+unrolling,hist,loop2,1
+unrolling,hist,loop1,1
+unrolling,update,loop3,1
+unrolling,update,loop1,1
+
+cycle_time,6

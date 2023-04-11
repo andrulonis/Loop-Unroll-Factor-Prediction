@@ -1,0 +1,15 @@
+partition,cyclic,host_val,13328,4,1
+partition,cyclic,host_cols,13328,4,1
+partition,cyclic,host_rowDelimiters,1980,4,1
+partition,cyclic,host_vec,3952,4,1
+partition,cyclic,host_out,3952,4,1
+partition,cyclic,val,13328,4,1
+partition,cyclic,cols,13328,4,1
+partition,cyclic,rowDelimiters,1980,4,1
+partition,cyclic,vec,3952,4,1
+partition,cyclic,out,3952,4,1
+
+unrolling,spmv,spmv_1,1
+unrolling,spmv,spmv_2,1
+
+cycle_time,6

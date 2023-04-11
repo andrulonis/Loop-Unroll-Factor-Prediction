@@ -1,0 +1,9 @@
+partition,cyclic,x,4096,4,1
+partition,cyclic,y,4096,4,1
+partition,cyclic,z,4096,4,1
+
+unrolling,bb_gemm,loopi,1
+unrolling,bb_gemm,loopk,1
+unrolling,bb_gemm,loopj,1
+
+cycle_time,6

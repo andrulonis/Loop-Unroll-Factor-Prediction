@@ -1,0 +1,11 @@
+partition,cyclic,host_nodes,4096,4,1
+partition,cyclic,host_edges,32768,4,1
+partition,cyclic,host_level,256,4,1
+partition,cyclic,host_level_counts,80,4,1
+
+unrolling,bfs,init_horizons,1
+unrolling,bfs,loop_horizons,1
+unrolling,bfs,loop_nodes,1
+unrolling,bfs,loop_neighbors,1
+
+cycle_time,6
