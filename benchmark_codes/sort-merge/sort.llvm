@@ -1,0 +1,154 @@
+; ModuleID = 'sort.c'
+source_filename = "sort.c"
+target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128"
+target triple = "x86_64-pc-linux-gnu"
+
+; Function Attrs: noinline nounwind uwtable
+define dso_local void @merge(i32* nocapture %a, i32 %start, i32 %m, i32 %stop) local_unnamed_addr #0 {
+entry:
+  %temp = alloca [2048 x i32], align 16
+  %0 = bitcast [2048 x i32]* %temp to i8*
+  call void @llvm.lifetime.start.p0i8(i64 8192, i8* nonnull %0) #2
+  %cmp68 = icmp slt i32 %m, %start
+  br i1 %cmp68, label %merge_label2, label %for.body.preheader
+
+for.body.preheader:                               ; preds = %entry
+  %1 = sext i32 %start to i64
+  %scevgep = getelementptr [2048 x i32], [2048 x i32]* %temp, i64 0, i64 %1
+  %scevgep74 = bitcast i32* %scevgep to i8*
+  %scevgep75 = getelementptr i32, i32* %a, i64 %1
+  %scevgep7576 = bitcast i32* %scevgep75 to i8*
+  %2 = icmp sgt i32 %m, %start
+  %3 = sub i32 %m, %start
+  %4 = select i1 %2, i32 %3, i32 0
+  %5 = zext i32 %4 to i64
+  %6 = shl nuw nsw i64 %5, 2
+  %7 = add nuw nsw i64 %6, 4
+  call void @llvm.memcpy.p0i8.p0i8.i64(i8* nonnull align 4 dereferenceable(1) %scevgep74, i8* nonnull align 4 dereferenceable(1) %scevgep7576, i64 %7, i1 false)
+  br label %merge_label2
+
+merge_label2:                                     ; preds = %for.body.preheader, %entry
+  %cmp466 = icmp slt i32 %m, %stop
+  br i1 %cmp466, label %for.body5.lr.ph, label %for.cond15.preheader
+
+for.body5.lr.ph:                                  ; preds = %merge_label2
+  %add = add nsw i32 %m, 1
+  %add9 = add nsw i32 %add, %stop
+  %8 = sext i32 %m to i64
+  %9 = add nsw i64 %8, 1
+  %10 = add i32 %stop, 1
+  br label %for.body5
+
+for.cond15.preheader:                             ; preds = %for.body5, %merge_label2
+  %cmp1662 = icmp sgt i32 %start, %stop
+  br i1 %cmp1662, label %for.end30, label %for.body17.preheader
+
+for.body17.preheader:                             ; preds = %for.cond15.preheader
+  %11 = sext i32 %start to i64
+  %12 = sext i32 %stop to i64
+  br label %for.body17
+
+for.body5:                                        ; preds = %for.body5, %for.body5.lr.ph
+  %indvars.iv70 = phi i64 [ %indvars.iv.next71, %for.body5 ], [ %9, %for.body5.lr.ph ]
+  %arrayidx7 = getelementptr inbounds i32, i32* %a, i64 %indvars.iv70
+  %13 = load i32, i32* %arrayidx7, align 4, !tbaa !2
+  %14 = trunc i64 %indvars.iv70 to i32
+  %sub = sub i32 %add9, %14
+  %idxprom10 = sext i32 %sub to i64
+  %arrayidx11 = getelementptr inbounds [2048 x i32], [2048 x i32]* %temp, i64 0, i64 %idxprom10
+  store i32 %13, i32* %arrayidx11, align 4, !tbaa !2
+  %indvars.iv.next71 = add i64 %indvars.iv70, 1
+  %lftr.wideiv = trunc i64 %indvars.iv.next71 to i32
+  %exitcond = icmp eq i32 %10, %lftr.wideiv
+  br i1 %exitcond, label %for.cond15.preheader, label %for.body5
+
+for.body17:                                       ; preds = %for.body17.preheader, %if.end
+  %indvars.iv = phi i64 [ %11, %for.body17.preheader ], [ %indvars.iv.next, %if.end ]
+  %i.165 = phi i32 [ %start, %for.body17.preheader ], [ %i.2, %if.end ]
+  %j.164 = phi i32 [ %stop, %for.body17.preheader ], [ %j.2, %if.end ]
+  %idxprom18 = sext i32 %j.164 to i64
+  %arrayidx19 = getelementptr inbounds [2048 x i32], [2048 x i32]* %temp, i64 0, i64 %idxprom18
+  %15 = load i32, i32* %arrayidx19, align 4, !tbaa !2
+  %idxprom20 = sext i32 %i.165 to i64
+  %arrayidx21 = getelementptr inbounds [2048 x i32], [2048 x i32]* %temp, i64 0, i64 %idxprom20
+  %16 = load i32, i32* %arrayidx21, align 4, !tbaa !2
+  %cmp22 = icmp slt i32 %15, %16
+  %arrayidx24 = getelementptr inbounds i32, i32* %a, i64 %indvars.iv
+  br i1 %cmp22, label %if.then, label %if.else
+
+if.then:                                          ; preds = %for.body17
+  store i32 %15, i32* %arrayidx24, align 4, !tbaa !2
+  %dec = add nsw i32 %j.164, -1
+  br label %if.end
+
+if.else:                                          ; preds = %for.body17
+  store i32 %16, i32* %arrayidx24, align 4, !tbaa !2
+  %inc27 = add nsw i32 %i.165, 1
+  br label %if.end
+
+if.end:                                           ; preds = %if.else, %if.then
+  %j.2 = phi i32 [ %dec, %if.then ], [ %j.164, %if.else ]
+  %i.2 = phi i32 [ %i.165, %if.then ], [ %inc27, %if.else ]
+  %indvars.iv.next = add nsw i64 %indvars.iv, 1
+  %cmp16 = icmp slt i64 %indvars.iv, %12
+  br i1 %cmp16, label %for.body17, label %for.end30
+
+for.end30:                                        ; preds = %if.end, %for.cond15.preheader
+  call void @llvm.lifetime.end.p0i8(i64 8192, i8* nonnull %0) #2
+  ret void
+}
+
+; Function Attrs: argmemonly nounwind willreturn
+declare void @llvm.lifetime.start.p0i8(i64 immarg, i8* nocapture) #1
+
+; Function Attrs: argmemonly nounwind willreturn
+declare void @llvm.lifetime.end.p0i8(i64 immarg, i8* nocapture) #1
+
+; Function Attrs: noinline nounwind uwtable
+define dso_local void @ms_mergesort(i32* nocapture %host_a, i32* nocapture readnone %a) local_unnamed_addr #0 {
+entry:
+  br label %for.cond1.preheader
+
+for.cond1.preheader:                              ; preds = %entry, %for.inc11
+  %m.038 = phi i32 [ 1, %entry ], [ %add12, %for.inc11 ]
+  %add9 = shl i32 %m.038, 1
+  br label %for.body3
+
+for.body3:                                        ; preds = %for.cond1.preheader, %for.body3
+  %i.037 = phi i32 [ 0, %for.cond1.preheader ], [ %add10, %for.body3 ]
+  %add = add nsw i32 %i.037, %m.038
+  %sub4 = add nsw i32 %add, -1
+  %add6 = add nsw i32 %add, %m.038
+  %sub7 = add nsw i32 %add6, -1
+  %cmp8.inv = icmp sgt i32 %add6, 2048
+  %sub7.sink = select i1 %cmp8.inv, i32 2048, i32 %sub7
+  call void @merge(i32* %host_a, i32 %i.037, i32 %sub4, i32 %sub7.sink)
+  %add10 = add nsw i32 %i.037, %add9
+  %cmp2 = icmp slt i32 %add10, 2048
+  br i1 %cmp2, label %for.body3, label %for.inc11
+
+for.inc11:                                        ; preds = %for.body3
+  %add12 = shl nsw i32 %m.038, 1
+  %cmp = icmp slt i32 %m.038, 1024
+  br i1 %cmp, label %for.cond1.preheader, label %for.end13
+
+for.end13:                                        ; preds = %for.inc11
+  ret void
+}
+
+; Function Attrs: argmemonly nounwind willreturn
+declare void @llvm.memcpy.p0i8.p0i8.i64(i8* noalias nocapture writeonly, i8* noalias nocapture readonly, i64, i1 immarg) #1
+
+attributes #0 = { noinline nounwind uwtable "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "frame-pointer"="none" "less-precise-fpmad"="false" "min-legal-vector-width"="0" "no-infs-fp-math"="false" "no-jump-tables"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
+attributes #1 = { argmemonly nounwind willreturn }
+attributes #2 = { nounwind }
+
+!llvm.module.flags = !{!0}
+!llvm.ident = !{!1}
+
+!0 = !{i32 1, !"wchar_size", i32 4}
+!1 = !{!"clang version 10.0.1 "}
+!2 = !{!3, !3, i64 0}
+!3 = !{!"int", !4, i64 0}
+!4 = !{!"omnipotent char", !5, i64 0}
+!5 = !{!"Simple C/C++ TBAA"}
