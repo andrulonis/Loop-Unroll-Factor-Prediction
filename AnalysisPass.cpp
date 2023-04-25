@@ -18,6 +18,7 @@ namespace {
         void getAnalysisUsage(AnalysisUsage &AU) const override {
             AU.addRequired<LoopInfoWrapperPass>();
             AU.addRequired<ScalarEvolutionWrapperPass>();
+            AU.addRequired<DependenceAnalysisWrapperPass>();
             AU.setPreservesAll();
         }
 
@@ -29,7 +30,7 @@ namespace {
             return count; 
         }
 
-        void analyseLoop(Loop *L, ScalarEvolution &SE) {//, DependenceInfo &DI) {
+        void analyseLoop(Loop *L, ScalarEvolution &SE, DependenceInfo &DI, Function &F) { //, LoopInfo &LI) {
             bool noTripCountKnown = false;
             unsigned loopTripCount = 0;
             unsigned numLoads = 0;
@@ -42,7 +43,8 @@ namespace {
             unsigned loopDepth = 0;
             unsigned numFirstNestLoops = 0;
             unsigned numAllNestLoops = 0;
-            // bool hasCarriedDependencies = false;
+            bool hasPurelyLoopsInside = true;
+            bool hasCarriedDependencies = false;
 
             loopDepth = L->getLoopDepth();
             numFirstNestLoops = L->getSubLoops().size();
@@ -110,6 +112,12 @@ namespace {
             // }
 
             for (auto *BB : L->getBlocks()) {
+                // if (auto *nestedLoop = LI.getLoopFor(BB)) { TODO:
+                //     if (nestedLoop == L) {
+                //         errs() << "test" << "\n";
+                //         hasPurelyLoopsInside = false;
+                //     }
+                // }
                 for (auto &I : *BB) {
                     if (isa<LoadInst>(&I)) {
                         numLoads++;
@@ -134,6 +142,42 @@ namespace {
                     if (isa<LoadInst>(&I) || isa<StoreInst>(&I)) {
                         numMemOps++;
                     }
+
+                    // if (!hasCarriedDependencies) {
+                    //     for (inst_iterator I = inst_begin(F), E = inst_end(F); I != E; I++) {
+                    //         for (inst_iterator J = I; J != E; J++) {
+                    //             std::unique_ptr<Dependence> infoPtr;
+                    //             infoPtr = DI.depends(&*I, &*J, true);
+                    //             Dependence *dep = infoPtr.get();
+                    //             if (dep != NULL && !dep->isInput()) {
+                    //                 if (!dep->isLoopIndependent()) {
+                    //                     hasCarriedDependencies = true;
+                    //                 }
+                    //                 // if (dep->isConfused()) errs() << "[C]";
+                    //                 // dep->getDst()->print(errs(), false);
+                    //                 // errs() << "   ---> ";
+                    //                 // dep->getSrc()->print(errs(), false);
+                    //                 // errs() << "\n";
+                    //             }
+                    //         }
+                    //     }
+                    // }
+
+                        // // check dependencies between each pair of instructions
+                        // for (inst_iterator I = inst_begin(F), E = inst_end(F); I != E; I++) {
+                        // for (inst_iterator J = I; J != E; J++) {
+                        //     std::unique_ptr<Dependence> infoPtr;
+                        //     infoPtr = depinfo->depends(&*I, &*J, true);
+                        //     Dependence *dep = infoPtr.get();
+                        //     if (dep != NULL && !dep->isInput()) {
+                        //     if (!dep->isLoopIndependent()) errs() << "[L]";
+                        //     if (dep->isConfused()) errs() << "[C]";
+                        //     dep->getDst()->print(errs(), false);
+                        //     errs() << "   ---> ";
+                        //     dep->getSrc()->print(errs(), false);
+                        //     errs() << "\n";
+                        //     }
+                        // }
 
                     // if (!hasVectorizableLoopBound || !hasLoopUpdate) {continue;}
 
@@ -163,6 +207,20 @@ namespace {
                     //     vectorizedSet.insert(&I);
                     // }
                 }
+                for (auto I = BB->begin(), E = BB->end(); I != E; ++I) {
+                    for (auto J = BB->begin(); J != E; ++J) {
+                        if (&*I != &*J) {
+                            std::unique_ptr<Dependence> infoPtr;
+                            infoPtr = DI.depends(&*I, &*J, true);
+                            Dependence *dep = infoPtr.get();
+                            if (dep != NULL && !dep->isInput()) {
+                                if (!dep->isLoopIndependent()) {
+                                    hasCarriedDependencies = true;
+                                }
+                            }
+                        }
+                    }
+                }
             }
             
             if (SE.getSmallConstantTripCount(L)) {
@@ -175,9 +233,13 @@ namespace {
                 noTripCountKnown = true;
             }
 
+            errs() << "### " << (noTripCountKnown ? -1 : loopTripCount) << "\t" << numLoads << "\t" << numStores << "\t" << 
+            numOperands << "\t" << numFP << "\t" << numInsts << "\t" << numBranches << "\t" << numMemOps << "\t" << 
+            loopDepth << "\t" << numFirstNestLoops << "\t" << numAllNestLoops << " ###\n";
+
             // Finding locations for each loop in original code, add -g to clang command
             if (L->getStartLoc()) {
-                errs() << "Loop at line:" << L->getStartLoc().getLine() << "\n";
+                errs() << "Loop at line: " << L->getStartLoc().getLine() << "\n";
             }
             errs() << "Loop:" << L->getName() << "\n";
             errs() << "Loop Trip Count: " << (noTripCountKnown ? -1 : loopTripCount) << "\n";
@@ -190,21 +252,22 @@ namespace {
             errs() << "Number of Memory Operations: " << numMemOps << "\n";
             errs() << "Loop Depth: " << loopDepth << "\n";
             errs() << "Number of Loops Inside (first nest level): " << numFirstNestLoops << "\n";
-            errs() << "Number of Loops Inside (all nest levels): " << numAllNestLoops << "\n\n";
-            // errs() << "Has loop carried dependencies: " << (hasCarriedDependencies ? "yes" : "no") << "\n\n";
+            errs() << "Number of Loops Inside (all nest levels): " << numAllNestLoops << "\n";
+            errs() << "Has Purely Loops Inside: " << hasPurelyLoopsInside << "\n";
+            errs() << "Has loop carried dependencies: " << (hasCarriedDependencies ? "yes" : "no") << "\n\n";
 
             for (Loop *SL : L->getSubLoops()) {
-                analyseLoop(SL, SE);//, DI);
+                analyseLoop(SL, SE, DI, F);//, LI);
             }
         }
 
         bool runOnFunction(Function &F) override {
             LoopInfo &LI = getAnalysis<LoopInfoWrapperPass>().getLoopInfo();
             ScalarEvolution &SE = getAnalysis<ScalarEvolutionWrapperPass>().getSE();
-            // DependenceInfo &DI = getAnalysis<DependenceAnalysisWrapperPass>().getDI();
-
+            DependenceInfo &DI = getAnalysis<DependenceAnalysisWrapperPass>().getDI();
+            
             for (Loop *L : LI) {
-                analyseLoop(L, SE);//, DI);
+                analyseLoop(L, SE, DI, F);//, LI);
             }
 
             return false;
