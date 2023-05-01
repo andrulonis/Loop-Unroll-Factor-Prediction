@@ -10,10 +10,11 @@ import numpy as np
 import pandas as pd
 
 def main():
-    data = pd.read_csv("results.csv", delimiter=";")
+    data = pd.read_csv("loops_data.csv", delimiter=";")
     data = data[["Loop max trip count", "# Load instructions", "# Store instructions", "# Operands", 
                  "# Floating point operations", "# Operations", "# Branches", "# Memory operations", 
                  "Loop depth", "# Loops inside (first nest level)", "# Loops inside (all nest levels)", 
+                 "Is outermost", "Is innermost", "Has loop carried dependencies", 
                  "Best factor for latency", "Best factor for area", "Best factor balanced"]]
     
     x = data.drop(["Best factor for latency", "Best factor for area", "Best factor balanced"], axis=1)
@@ -60,7 +61,8 @@ def main():
         # y_pred = randomForest.predict(x_test)
         # score = randomForest.score(x_test, y_test)
 
-
+    print(scores)
+    print(errors)
     # mean_score = sum(scores) / len(scores)
     # mean_error = sum(errors) / len(errors)
 
