@@ -4,17 +4,17 @@ import os
 dirs = ["bb_gemm", "fft", "md", "pp_scan", "reduction", "ss_sort", "stencil", "triad"]
 
 for programme in dirs:
-    os.chdir(f"./{programme}")
+    os.chdir(programme)
     commands = [
         f"clang -O0 -Xclang -disable-O0-optnone -emit-llvm {programme}.c -S -o software/{programme}.ll",
-        f"opt -mem2reg -simplifycfg -loop-simplify -lcssa -indvars -S software/{programme}.ll -o software/{programme}_no.ll",
-        f"opt -mem2reg -simplifycfg -loop-simplify -lcssa -indvars -loop-unroll -S software/{programme}.ll -o software/{programme}_auto.ll",
-        f"opt -mem2reg -simplifycfg -loop-simplify -lcssa -indvars -loop-unroll -unroll-count=2 -S software/{programme}.ll -o software/{programme}_2.ll",
-        f"opt -mem2reg -simplifycfg -loop-simplify -lcssa -indvars -loop-unroll -unroll-count=4 -S software/{programme}.ll -o software/{programme}_4.ll",
-        f"opt -mem2reg -simplifycfg -loop-simplify -lcssa -indvars -loop-unroll -unroll-count=8 -S software/{programme}.ll -o software/{programme}_8.ll",
-        f"opt -mem2reg -simplifycfg -loop-simplify -lcssa -indvars -loop-unroll -unroll-count=16 -S software/{programme}.ll -o software/{programme}_16.ll",
-        f"opt -mem2reg -simplifycfg -loop-simplify -lcssa -indvars -loop-unroll -unroll-count=32 -S software/{programme}.ll -o software/{programme}_32.ll",
-        f"opt -mem2reg -simplifycfg -loop-simplify -lcssa -indvars -loop-unroll -unroll-count=64 -S software/{programme}.ll -o software/{programme}_64.ll",
+        f"opt -mem2reg -loop-simplify -loop-rotate -instcombine -simplifycfg -lcssa -indvars -S software/{programme}.ll -o software/{programme}_no.ll",
+        f"opt -mem2reg -loop-simplify -loop-rotate -instcombine -simplifycfg -lcssa -indvars -loop-unroll -S software/{programme}.ll -o software/{programme}_auto.ll",
+        f"opt -mem2reg -loop-simplify -loop-rotate -instcombine -simplifycfg -lcssa -indvars -loop-unroll -unroll-count=2 -S software/{programme}.ll -o software/{programme}_2.ll",
+        f"opt -mem2reg -loop-simplify -loop-rotate -instcombine -simplifycfg -lcssa -indvars -loop-unroll -unroll-count=4 -S software/{programme}.ll -o software/{programme}_4.ll",
+        f"opt -mem2reg -loop-simplify -loop-rotate -instcombine -simplifycfg -lcssa -indvars -loop-unroll -unroll-count=8 -S software/{programme}.ll -o software/{programme}_8.ll",
+        f"opt -mem2reg -loop-simplify -loop-rotate -instcombine -simplifycfg -lcssa -indvars -loop-unroll -unroll-count=16 -S software/{programme}.ll -o software/{programme}_16.ll",
+        f"opt -mem2reg -loop-simplify -loop-rotate -instcombine -simplifycfg -lcssa -indvars -loop-unroll -unroll-count=32 -S software/{programme}.ll -o software/{programme}_32.ll",
+        f"opt -mem2reg -loop-simplify -loop-rotate -instcombine -simplifycfg -lcssa -indvars -loop-unroll -unroll-count=64 -S software/{programme}.ll -o software/{programme}_64.ll",
         f"llc -O0 software/{programme}_no.ll -o software/{programme}_no.s",
         f"llc -O0 software/{programme}_auto.ll -o software/{programme}_auto.s",
         f"llc -O0 software/{programme}_2.ll -o software/{programme}_2.s",

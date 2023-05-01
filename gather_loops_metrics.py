@@ -10,8 +10,8 @@ def main():
             os.chdir(dirname)
             programme = os.path.basename(os.getcwd()).split("-")[0]
             f.write(dirname + "\n")
-            analysis = subprocess.getoutput("myopt -loop-analysis " + programme + ".llvm").split("###")
-            loop_lines = subprocess.getoutput("myopt -loop-analysis " + programme + "_dbg.llvm").split("Loop at line: ")[1:]
+            analysis = subprocess.getoutput(f"myopt -loop-analysis {programme}.ll").split("###")
+            loop_lines = subprocess.getoutput(f"myopt -loop-analysis {programme}_dbg.ll").split("Loop at line: ")[1:]
             for line, loop_metrics in zip(loop_lines, analysis[1::2]):
                 f.write(line.split()[0] + "\t")
                 f.write(loop_metrics + "\n")

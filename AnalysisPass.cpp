@@ -1,4 +1,3 @@
-#define DEBUG_TYPE "LoopAnalysisPass"
 #include "utils.h"
 #include "llvm/Pass.h"
 #include "llvm/Analysis/LoopInfo.h"
@@ -6,7 +5,10 @@
 #include "llvm/Analysis/DependenceAnalysis.h"
 #include "llvm/IR/Function.h"
 #include "llvm/IR/Instructions.h"
+#include "llvm/Transforms/Utils.h"
 #include "llvm/Support/raw_ostream.h"
+
+#define DEBUG_TYPE "LoopAnalysisPass"
 
 using namespace llvm;
 
@@ -19,6 +21,7 @@ namespace {
             AU.addRequired<LoopInfoWrapperPass>();
             AU.addRequired<ScalarEvolutionWrapperPass>();
             AU.addRequired<DependenceAnalysisWrapperPass>();
+            AU.addRequiredID(LoopSimplifyID);
             AU.setPreservesAll();
         }
 
@@ -43,81 +46,57 @@ namespace {
             unsigned loopDepth = 0;
             unsigned numFirstNestLoops = 0;
             unsigned numAllNestLoops = 0;
-            bool hasPurelyLoopsInside = true;
+            bool isOuterMost = false;
+            bool isInnerMost = false;
             bool hasCarriedDependencies = false;
+
+            PHINode* indVar = L->getInductionVariable(SE);
+            BinaryOperator* indVarUpdate = NULL;
+            ICmpInst* cmp = NULL;
+            bool hasLoopUpdate = false;
+            std::set<Value*> vectorizedSet;
 
             loopDepth = L->getLoopDepth();
             numFirstNestLoops = L->getSubLoops().size();
             if (L->getSubLoops().size() > 0) {
                 numAllNestLoops = countAllNestedLoops(L);
             }
+            if (L->getParentLoop() == NULL) {
+                isOuterMost = true;
+            }
+            if (L->getSubLoops().empty()) {
+                isInnerMost = true;
+            }
 
-            // PHINode* indVar = L->getInductionVariable(SE);
-            // errs() << indVar << "\n\n\n";
-            // std::set<Value*> vectorizedSet;
-            // BinaryOperator* indVarUpdate = NULL;
-            // ICmpInst* cmp = NULL;
-            // int VECTOR_SIZE = 4;
-            // bool hasVectorizableLoopBound = false;
-            // bool hasLoopUpdate = false;
+            if (BasicBlock* latchBlock = L->getExitingBlock()) {
+                for (auto& lbInst : *latchBlock) {
+                    if (auto* exitingBranch = dyn_cast<BranchInst>(&lbInst)) {
+                        if (exitingBranch->isConditional()) {
+                            cmp = dyn_cast<ICmpInst>(exitingBranch->getCondition());
+                        }
+                    }
+                }
+            }
 
-            // if (BasicBlock* latchBlock = L->getExitingBlock()) {
-            //     for (auto& lbInst : *latchBlock) {
-            //         if (auto* exitingBranch = dyn_cast<BranchInst>(&lbInst)) {
-            //             // branch must have a condition (which sets the loop bound)
-            //             if (exitingBranch->isConditional()) {
-            //                 if ((cmp = dyn_cast<ICmpInst>(exitingBranch->getCondition()))) {
-            //                     Value* op1 = cmp->getOperand(0);
-            //                     Value* op2 = cmp->getOperand(1);
-            //                     errs() << op1 << "\n";
-            //                     errs() << op2 << "\n";
-            //                     errs() << indVar << "\n\n\n";
-            //                     Value* loopBound = op1 == indVar ? op2 : (op2 == indVar ? op1 : NULL);
-            //                     // loop bound must be a constant. otherwise we can't vectorize
-            //                     if (loopBound != NULL) {
-            //                         if (auto* loopBoundConst = dyn_cast<ConstantInt>(loopBound)) {
-            //                             int64_t intBound = loopBoundConst->getSExtValue();
-            //                             hasVectorizableLoopBound = intBound % VECTOR_SIZE == 0;
-            //                         }
-            //                     } 
-            //                     else {
-            //                     // errs() << "no loop bound found!\n";
-            //                     }
-            //                 }
-            //             }
-            //         }
-            //     }
-            // }
+            if (indVar != NULL) {
+                for (unsigned int i = 0; i < indVar->getNumIncomingValues(); i++) {
+                    Value* incomingVal = indVar->getIncomingValue(i);
 
-            // if (hasVectorizableLoopBound) {
-            //     // find indvar update instruction
-            //     // dont vectorize unless we find an update instruction
-            //     for (unsigned i = 0; i < indVar->getNumIncomingValues(); i++) {
-            //         Value* incomingVal = indVar->getIncomingValue(i);
+                    if (auto* binOp = dyn_cast<BinaryOperator>(incomingVal)) {
+                        bool isIndVarOp = binOp->getOperand(0) == indVar || binOp->getOperand(1) == indVar;
 
-            //         if (auto* binOp = dyn_cast<BinaryOperator>(incomingVal)) {
-            //             bool isIndVarOp = binOp->getOperand(0) == indVar || binOp->getOperand(1) == indVar;
-
-            //             if (isIndVarOp && indVarUpdate == NULL) {
-            //                 indVarUpdate = binOp;
-            //                 hasLoopUpdate = true;
-
-            //             // multiple updates to the indvar is not allowed!
-            //             } 
-            //             else if (isIndVarOp && indVarUpdate != NULL) {
-            //                 hasLoopUpdate = false;
-            //             }
-            //         }
-            //     }
-            // }
-
+                        if (isIndVarOp && indVarUpdate == NULL) {
+                            indVarUpdate = binOp;
+                            hasLoopUpdate = true;
+                        } 
+                        else if (isIndVarOp && indVarUpdate != NULL) {
+                            hasLoopUpdate = false;
+                        }
+                    }
+                }
+            }
+            
             for (auto *BB : L->getBlocks()) {
-                // if (auto *nestedLoop = LI.getLoopFor(BB)) { TODO:
-                //     if (nestedLoop == L) {
-                //         errs() << "test" << "\n";
-                //         hasPurelyLoopsInside = false;
-                //     }
-                // }
                 for (auto &I : *BB) {
                     if (isa<LoadInst>(&I)) {
                         numLoads++;
@@ -142,85 +121,52 @@ namespace {
                     if (isa<LoadInst>(&I) || isa<StoreInst>(&I)) {
                         numMemOps++;
                     }
-
-                    // if (!hasCarriedDependencies) {
-                    //     for (inst_iterator I = inst_begin(F), E = inst_end(F); I != E; I++) {
-                    //         for (inst_iterator J = I; J != E; J++) {
-                    //             std::unique_ptr<Dependence> infoPtr;
-                    //             infoPtr = DI.depends(&*I, &*J, true);
-                    //             Dependence *dep = infoPtr.get();
-                    //             if (dep != NULL && !dep->isInput()) {
-                    //                 if (!dep->isLoopIndependent()) {
-                    //                     hasCarriedDependencies = true;
-                    //                 }
-                    //                 // if (dep->isConfused()) errs() << "[C]";
-                    //                 // dep->getDst()->print(errs(), false);
-                    //                 // errs() << "   ---> ";
-                    //                 // dep->getSrc()->print(errs(), false);
-                    //                 // errs() << "\n";
-                    //             }
-                    //         }
-                    //     }
-                    // }
-
-                        // // check dependencies between each pair of instructions
-                        // for (inst_iterator I = inst_begin(F), E = inst_end(F); I != E; I++) {
-                        // for (inst_iterator J = I; J != E; J++) {
-                        //     std::unique_ptr<Dependence> infoPtr;
-                        //     infoPtr = depinfo->depends(&*I, &*J, true);
-                        //     Dependence *dep = infoPtr.get();
-                        //     if (dep != NULL && !dep->isInput()) {
-                        //     if (!dep->isLoopIndependent()) errs() << "[L]";
-                        //     if (dep->isConfused()) errs() << "[C]";
-                        //     dep->getDst()->print(errs(), false);
-                        //     errs() << "   ---> ";
-                        //     dep->getSrc()->print(errs(), false);
-                        //     errs() << "\n";
-                        //     }
-                        // }
-
-                    // if (!hasVectorizableLoopBound || !hasLoopUpdate) {continue;}
-
-                    // if (hasCarriedDependencies || &I == cmp || &I == indVar || &I == indVarUpdate) {continue;} 
-                    // else if (auto* gep = dyn_cast<GetElementPtrInst>(&I)) {
-                    //     for (auto& index : gep->indices()) { 
-                    //         if (index != indVar && !L->isLoopInvariant(index)) {
-                    //             hasCarriedDependencies = true;
-                    //         }
-                    //     }
-                    //     vectorizedSet.insert(gep);
-                    // } 
-                    // else if (auto* branch = dyn_cast<BranchInst>(&I)) {
-                    //     if (branch->isConditional()) {
-                    //         if (L->isLoopInvariant(branch->getCondition())) {
-                    //             hasCarriedDependencies = true; 
-                    //         }
-                    //     }
-                    // } 
-                    // else {
-                    //     for (unsigned i = 0; i < I.getNumOperands(); i ++) {
-                    //         Value* operand = I.getOperand(i);
-                    //         if (vectorizedSet.count(operand) == 0 && !L->isLoopInvariant(operand) && operand != indVar) {
-                    //             hasCarriedDependencies = true;
-                    //         }
-                    //     }
-                    //     vectorizedSet.insert(&I);
-                    // }
-                }
-                for (auto I = BB->begin(), E = BB->end(); I != E; ++I) {
-                    for (auto J = BB->begin(); J != E; ++J) {
-                        if (&*I != &*J) {
-                            std::unique_ptr<Dependence> infoPtr;
-                            infoPtr = DI.depends(&*I, &*J, true);
-                            Dependence *dep = infoPtr.get();
-                            if (dep != NULL && !dep->isInput()) {
-                                if (!dep->isLoopIndependent()) {
+                    
+                    if (hasLoopUpdate && !hasCarriedDependencies) {
+                        if (&I == cmp || &I == indVar || &I == indVarUpdate) {continue;}
+                        else if (auto* gep = dyn_cast<GetElementPtrInst>(&I)) {
+                            for (auto& index : gep->indices()) { 
+                                if (index != indVar && !L->isLoopInvariant(index)) {
                                     hasCarriedDependencies = true;
                                 }
                             }
+                            vectorizedSet.insert(gep);
+                        } 
+                        else if (auto* branch = dyn_cast<BranchInst>(&I)) {
+                            if (branch->isConditional()) {
+                                if (L->isLoopInvariant(branch->getCondition())) {
+                                    hasCarriedDependencies = true; 
+                                }
+                            }
+                        } 
+                        else {
+                            for (unsigned int i = 0; i < I.getNumOperands(); i ++) {
+                                Value* operand = I.getOperand(i);
+                                if (vectorizedSet.count(operand) == 0
+                                    && !L->isLoopInvariant(operand)
+                                    && operand != indVar) {
+                                    hasCarriedDependencies = true;
+                                }
+                            }
+                            vectorizedSet.insert(&I);
                         }
                     }
                 }
+
+                // for (auto I = BB->begin(), E = BB->end(); I != E; ++I) {
+                //     for (auto J = BB->begin(); J != E; ++J) {
+                //         if (&*I != &*J) {
+                //             std::unique_ptr<Dependence> infoPtr;
+                //             infoPtr = DI.depends(&*I, &*J, true);
+                //             Dependence *dep = infoPtr.get();
+                //             if (dep != NULL && !dep->isInput()) {
+                //                 if (!dep->isLoopIndependent()) {
+                //                     hasCarriedDependencies = true;
+                //                 }
+                //             }
+                //         }
+                //     }
+                // }
             }
             
             if (SE.getSmallConstantTripCount(L)) {
@@ -233,14 +179,17 @@ namespace {
                 noTripCountKnown = true;
             }
 
+            // Used for easier data extraction
             errs() << "### " << (noTripCountKnown ? -1 : loopTripCount) << "\t" << numLoads << "\t" << numStores << "\t" << 
             numOperands << "\t" << numFP << "\t" << numInsts << "\t" << numBranches << "\t" << numMemOps << "\t" << 
-            loopDepth << "\t" << numFirstNestLoops << "\t" << numAllNestLoops << " ###\n";
+            loopDepth << "\t" << numFirstNestLoops << "\t" << numAllNestLoops << "\t" << isOuterMost << "\t" << 
+            isInnerMost << "\t" << hasCarriedDependencies << " ###\n";
 
             // Finding locations for each loop in original code, add -g to clang command
             if (L->getStartLoc()) {
                 errs() << "Loop at line: " << L->getStartLoc().getLine() << "\n";
             }
+
             errs() << "Loop:" << L->getName() << "\n";
             errs() << "Loop Trip Count: " << (noTripCountKnown ? -1 : loopTripCount) << "\n";
             errs() << "Number of Load Instructions: " << numLoads << "\n";
@@ -253,11 +202,13 @@ namespace {
             errs() << "Loop Depth: " << loopDepth << "\n";
             errs() << "Number of Loops Inside (first nest level): " << numFirstNestLoops << "\n";
             errs() << "Number of Loops Inside (all nest levels): " << numAllNestLoops << "\n";
-            errs() << "Has Purely Loops Inside: " << hasPurelyLoopsInside << "\n";
+            errs() << "Is outermost: " << (isOuterMost ? "yes" : "no") << "\n";
+            errs() << "Is innermost: " << (isInnerMost ? "yes" : "no") << "\n";
             errs() << "Has loop carried dependencies: " << (hasCarriedDependencies ? "yes" : "no") << "\n\n";
 
+            // Recursively analyse all subloops
             for (Loop *SL : L->getSubLoops()) {
-                analyseLoop(SL, SE, DI, F);//, LI);
+                analyseLoop(SL, SE, DI, F);
             }
         }
 
@@ -267,7 +218,7 @@ namespace {
             DependenceInfo &DI = getAnalysis<DependenceAnalysisWrapperPass>().getDI();
             
             for (Loop *L : LI) {
-                analyseLoop(L, SE, DI, F);//, LI);
+                analyseLoop(L, SE, DI, F);
             }
 
             return false;
