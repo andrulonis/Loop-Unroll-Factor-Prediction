@@ -2,8 +2,10 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.svm import SVR
 from sklearn.neural_network import MLPRegressor
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.linear_model import LinearRegression
 from sklearn.multioutput import MultiOutputRegressor
-from sklearn.dummy import DummyClassifier
+from sklearn.metrics import r2_score
 from sklearn.model_selection import train_test_split
 from sklearn import preprocessing
 import matplotlib.pyplot as plt
@@ -15,11 +17,11 @@ unroll_factors = np.array([1,2,4,8,16,32,64])
 alpha = [0.9, 0.1, 0.5]
 max_int = 2147483647
 
-def train_model(x, y, z, model):
+def train_model(x, y, z, model, name):
     scores = []
     errors = []
 
-    for i in range(1000):
+    for i in range(100 if name == "MLP" else 1000):
         x_train, x_test, y_train, y_test, _, z_test = train_test_split(x, y, z, test_size=0.2)
 
         scaler = preprocessing.StandardScaler()
@@ -88,6 +90,7 @@ def train_model(x, y, z, model):
     
     mean_score = list(map(lambda x: x/len(scores), [sum0, sum1, sum2]))
     mean_error = list(map(lambda x: x/len(errors), [error0, error1, error2]))
+    print(name)
     print(mean_score)
     print(mean_error)
     print(num_zeros)
@@ -125,22 +128,48 @@ def main():
     z = data[["1 Latency", "1 Area", "2 Latency", "2 Area", "4 Latency", "4 Area", 
                           "8 Latency", "8 Area", "16 Latency", "16 Area", "32 Latency", "32 Area", 
                           "64 Latency", "64 Area"]]
+    
+    # Part for correlation matrix, commented out as it had to be done once
+    # corr_matrix = data.drop(["1 Latency", "1 Area", "2 Latency", "2 Area", "4 Latency", "4 Area", 
+    #                       "8 Latency", "8 Area", "16 Latency", "16 Area", "32 Latency", "32 Area", 
+    #                       "64 Latency", "64 Area"], axis=1).corr()
+    # fig, ax = plt.subplots(figsize=(8, 6))
+    # heatmap = ax.pcolor(corr_matrix, cmap='coolwarm')
+    # ax.set_xticks(np.arange(0.5,18.5, step = 1), ["Loop max trip count", "# Load instructions", "# Store instructions", "# Operands", 
+    #              "# Floating point operations", "# Operations", "# Branches", "# Memory operations", 
+    #              "Loop depth", "# Loops inside (first nest level)", "# Loops inside (all nest levels)", 
+    #              "Is outermost", "Is innermost", "Has loop carried dependencies", "Trip count known",
+    #              "Best factor for latency", "Best factor for area", "Best factor balanced"], 
+    #              rotation = 45, ha="right", rotation_mode="anchor")
+    # ax.set_yticks(np.arange(0.5,18.5, step = 1), ["Loop max trip count", "# Load instructions", "# Store instructions", "# Operands", 
+    #              "# Floating point operations", "# Operations", "# Branches", "# Memory operations", 
+    #              "Loop depth", "# Loops inside (first nest level)", "# Loops inside (all nest levels)", 
+    #              "Is outermost", "Is innermost", "Has loop carried dependencies", "Trip count known",
+    #              "Best factor for latency", "Best factor for area", "Best factor balanced"])
+    # ax.invert_yaxis()
+    # plt.colorbar(heatmap)
+    # plt.title('Correlation Matrix', fontsize=16)
+    # plt.tight_layout()
+    # plt.savefig("Correlation matrix.png")
 
     # TODO: optimise the hyperparams
     models = [
-        # RandomForestRegressor(warm_start=True), 
-        # KNeighborsRegressor(n_neighbors=1),
-        # SVR(gamma=0.0001, C=1000), 
-        # MLPRegressor(max_iter=10000)
+        (LinearRegression(), "Linear")
+        (DecisionTreeRegressor(), "Decision Tree")
+        (RandomForestRegressor(), "Random Forest"), 
+        (KNeighborsRegressor(n_neighbors=1), "KNN"),
+        (SVR(C=1000), "SVM"), 
+        (MLPRegressor(max_iter=20000, hidden_layer_sizes=(100,)), "MLP")
     ]
     
     # Models predictions
     for model in models:
-        train_model(x, y, z, model)
+        train_model(x, y, z, model[0], model[1])
 
+    # TODO: uncomment later 
     # Baselines for always predicting x unroll factor
     for unroll in unroll_factors:
-        train_model(x, y, z, unroll)
+        train_model(x, y, z, unroll, f"Unroll: {unroll}")
 
     #TODO: this is just for after evaluation to predict actual unrolls
     # final_model = RandomForestRegressor()
