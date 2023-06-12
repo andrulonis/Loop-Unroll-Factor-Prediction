@@ -1,0 +1,215 @@
+; ModuleID = 'pp_scan.c'
+source_filename = "pp_scan.c"
+target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128"
+target triple = "x86_64-pc-linux-gnu"
+
+@.str = private unnamed_addr constant [4 x i8] c"%u\09\00", align 1
+
+; Function Attrs: nofree noinline nounwind uwtable
+define dso_local void @print(i32* nocapture readonly %a, i32 %size) local_unnamed_addr #0 {
+entry:
+  %cmp4 = icmp sgt i32 %size, 0
+  br i1 %cmp4, label %for.body.preheader, label %for.end
+
+for.body.preheader:                               ; preds = %entry
+  %wide.trip.count = zext i32 %size to i64
+  br label %for.body
+
+for.body:                                         ; preds = %for.body, %for.body.preheader
+  %indvars.iv = phi i64 [ 0, %for.body.preheader ], [ %indvars.iv.next, %for.body ]
+  %arrayidx = getelementptr inbounds i32, i32* %a, i64 %indvars.iv
+  %0 = load i32, i32* %arrayidx, align 4, !tbaa !2
+  %call = call i32 (i8*, ...) @printf(i8* nonnull dereferenceable(1) getelementptr inbounds ([4 x i8], [4 x i8]* @.str, i64 0, i64 0), i32 %0)
+  %indvars.iv.next = add nuw nsw i64 %indvars.iv, 1
+  %exitcond = icmp eq i64 %indvars.iv.next, %wide.trip.count
+  br i1 %exitcond, label %for.end, label %for.body
+
+for.end:                                          ; preds = %for.body, %entry
+  ret void
+}
+
+; Function Attrs: argmemonly nounwind willreturn
+declare void @llvm.lifetime.start.p0i8(i64 immarg, i8* nocapture) #1
+
+; Function Attrs: nofree nounwind
+declare dso_local i32 @printf(i8* nocapture readonly, ...) local_unnamed_addr #2
+
+; Function Attrs: argmemonly nounwind willreturn
+declare void @llvm.lifetime.end.p0i8(i64 immarg, i8* nocapture) #1
+
+; Function Attrs: nofree noinline norecurse nounwind uwtable
+define dso_local void @local_scan(i32* nocapture %bucket) local_unnamed_addr #3 {
+entry:
+  br label %for.cond1.preheader
+
+for.cond1.preheader:                              ; preds = %for.inc9, %entry
+  %indvars.iv25 = phi i64 [ 0, %entry ], [ %indvars.iv.next26, %for.inc9 ]
+  %0 = shl nuw nsw i64 %indvars.iv25, 4
+  %scevgep = getelementptr i32, i32* %bucket, i64 %0
+  %1 = shl nsw i64 %indvars.iv25, 4
+  %load_initial = load i32, i32* %scevgep, align 4
+  br label %for.body3
+
+for.body3:                                        ; preds = %for.body3, %for.cond1.preheader
+  %store_forwarded = phi i32 [ %load_initial, %for.cond1.preheader ], [ %add8, %for.body3 ]
+  %indvars.iv = phi i64 [ 1, %for.cond1.preheader ], [ %indvars.iv.next, %for.body3 ]
+  %2 = add nuw nsw i64 %indvars.iv, %1
+  %arrayidx7 = getelementptr inbounds i32, i32* %bucket, i64 %2
+  %3 = load i32, i32* %arrayidx7, align 4, !tbaa !2
+  %add8 = add nsw i32 %3, %store_forwarded
+  store i32 %add8, i32* %arrayidx7, align 4, !tbaa !2
+  %indvars.iv.next = add nuw nsw i64 %indvars.iv, 1
+  %exitcond = icmp eq i64 %indvars.iv.next, 16
+  br i1 %exitcond, label %for.inc9, label %for.body3
+
+for.inc9:                                         ; preds = %for.body3
+  %indvars.iv.next26 = add nuw nsw i64 %indvars.iv25, 1
+  %exitcond28 = icmp eq i64 %indvars.iv.next26, 128
+  br i1 %exitcond28, label %for.end11, label %for.cond1.preheader
+
+for.end11:                                        ; preds = %for.inc9
+  ret void
+}
+
+; Function Attrs: nofree noinline norecurse nounwind uwtable
+define dso_local void @sum_scan(i32* nocapture %sum, i32* nocapture readonly %bucket) local_unnamed_addr #3 {
+entry:
+  store i32 0, i32* %sum, align 4, !tbaa !2
+  br label %for.body
+
+for.body:                                         ; preds = %for.body, %entry
+  %store_forwarded = phi i32 [ 0, %entry ], [ %add, %for.body ]
+  %indvars.iv = phi i64 [ 1, %entry ], [ %indvars.iv.next, %for.body ]
+  %0 = shl i64 %indvars.iv, 4
+  %1 = add nsw i64 %0, -1
+  %arrayidx4 = getelementptr inbounds i32, i32* %bucket, i64 %1
+  %2 = load i32, i32* %arrayidx4, align 4, !tbaa !2
+  %add = add nsw i32 %2, %store_forwarded
+  %arrayidx6 = getelementptr inbounds i32, i32* %sum, i64 %indvars.iv
+  store i32 %add, i32* %arrayidx6, align 4, !tbaa !2
+  %indvars.iv.next = add nuw nsw i64 %indvars.iv, 1
+  %exitcond = icmp eq i64 %indvars.iv.next, 128
+  br i1 %exitcond, label %for.end, label %for.body
+
+for.end:                                          ; preds = %for.body
+  ret void
+}
+
+; Function Attrs: nofree noinline norecurse nounwind uwtable
+define dso_local void @last_step_scan(i32* nocapture readonly %bucket, i32* nocapture %bucket2, i32* nocapture readonly %sum) local_unnamed_addr #3 {
+entry:
+  br label %for.cond1.preheader
+
+for.cond1.preheader:                              ; preds = %for.inc11, %entry
+  %indvars.iv26 = phi i64 [ 0, %entry ], [ %indvars.iv.next27, %for.inc11 ]
+  %0 = shl i64 %indvars.iv26, 4
+  %arrayidx5 = getelementptr inbounds i32, i32* %sum, i64 %indvars.iv26
+  br label %for.body3
+
+for.body3:                                        ; preds = %for.body3, %for.cond1.preheader
+  %indvars.iv = phi i64 [ 0, %for.cond1.preheader ], [ %indvars.iv.next, %for.body3 ]
+  %1 = add nuw nsw i64 %indvars.iv, %0
+  %arrayidx = getelementptr inbounds i32, i32* %bucket, i64 %1
+  %2 = load i32, i32* %arrayidx, align 4, !tbaa !2
+  %3 = load i32, i32* %arrayidx5, align 4, !tbaa !2
+  %add6 = add nsw i32 %3, %2
+  %arrayidx10 = getelementptr inbounds i32, i32* %bucket2, i64 %1
+  store i32 %add6, i32* %arrayidx10, align 4, !tbaa !2
+  %indvars.iv.next = add nuw nsw i64 %indvars.iv, 1
+  %exitcond = icmp eq i64 %indvars.iv.next, 16
+  br i1 %exitcond, label %for.inc11, label %for.body3
+
+for.inc11:                                        ; preds = %for.body3
+  %indvars.iv.next27 = add nuw nsw i64 %indvars.iv26, 1
+  %exitcond29 = icmp eq i64 %indvars.iv.next27, 128
+  br i1 %exitcond29, label %for.end13, label %for.cond1.preheader
+
+for.end13:                                        ; preds = %for.inc11
+  ret void
+}
+
+; Function Attrs: nofree noinline norecurse nounwind uwtable
+define dso_local void @pp_scan(i32* nocapture %bucket, i32* nocapture %bucket2, i32* nocapture %sum) local_unnamed_addr #3 {
+entry:
+  call void @local_scan(i32* %bucket)
+  call void @sum_scan(i32* %sum, i32* %bucket)
+  call void @last_step_scan(i32* %bucket, i32* %bucket2, i32* %sum)
+  ret void
+}
+
+; Function Attrs: noinline nounwind uwtable
+define dso_local i32 @main() local_unnamed_addr #4 {
+entry:
+  %sum = alloca [128 x i32], align 16
+  %call = call noalias dereferenceable_or_null(8192) i8* @malloc(i64 8192) #7
+  %0 = bitcast i8* %call to i32*
+  %call1 = call noalias dereferenceable_or_null(8192) i8* @malloc(i64 8192) #7
+  %1 = bitcast i8* %call1 to i32*
+  %2 = bitcast [128 x i32]* %sum to i8*
+  call void @llvm.lifetime.start.p0i8(i64 512, i8* nonnull %2) #7
+  call void @srand(i32 8650341) #7
+  br label %for.body
+
+for.body:                                         ; preds = %for.body, %entry
+  %indvars.iv = phi i64 [ 0, %entry ], [ %indvars.iv.next, %for.body ]
+  %call2 = call i32 @rand() #7
+  %conv = sitofp i32 %call2 to double
+  %div = fdiv double %conv, 0x41DFFFFFFFC00000
+  %mul = fmul double %div, 2.048000e+03
+  %add = fadd double %mul, 0.000000e+00
+  %conv5 = fptosi double %add to i32
+  %arrayidx = getelementptr inbounds i32, i32* %0, i64 %indvars.iv
+  store i32 %conv5, i32* %arrayidx, align 4, !tbaa !2
+  %call6 = call i32 @rand() #7
+  %conv7 = sitofp i32 %call6 to double
+  %div8 = fdiv double %conv7, 0x41DFFFFFFFC00000
+  %mul11 = fmul double %div8, 2.048000e+03
+  %add13 = fadd double %mul11, 0.000000e+00
+  %conv14 = fptosi double %add13 to i32
+  %arrayidx16 = getelementptr inbounds i32, i32* %1, i64 %indvars.iv
+  store i32 %conv14, i32* %arrayidx16, align 4, !tbaa !2
+  %indvars.iv.next = add nuw nsw i64 %indvars.iv, 1
+  %exitcond = icmp eq i64 %indvars.iv.next, 2048
+  br i1 %exitcond, label %for.end, label %for.body
+
+for.end:                                          ; preds = %for.body
+  call void @print(i32* %0, i32 1)
+  %putchar = call i32 @putchar(i32 10)
+  %arraydecay = getelementptr inbounds [128 x i32], [128 x i32]* %sum, i64 0, i64 0
+  call void @pp_scan(i32* %0, i32* %1, i32* nonnull %arraydecay)
+  call void @print(i32* %0, i32 2)
+  %putchar37 = call i32 @putchar(i32 10)
+  call void @llvm.lifetime.end.p0i8(i64 512, i8* nonnull %2) #7
+  ret i32 0
+}
+
+; Function Attrs: nofree nounwind
+declare dso_local noalias i8* @malloc(i64) local_unnamed_addr #2
+
+; Function Attrs: nounwind
+declare dso_local void @srand(i32) local_unnamed_addr #5
+
+; Function Attrs: nounwind
+declare dso_local i32 @rand() local_unnamed_addr #5
+
+; Function Attrs: nofree nounwind
+declare i32 @putchar(i32) local_unnamed_addr #6
+
+attributes #0 = { nofree noinline nounwind uwtable "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "frame-pointer"="none" "less-precise-fpmad"="false" "min-legal-vector-width"="0" "no-infs-fp-math"="false" "no-jump-tables"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
+attributes #1 = { argmemonly nounwind willreturn }
+attributes #2 = { nofree nounwind "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "frame-pointer"="none" "less-precise-fpmad"="false" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
+attributes #3 = { nofree noinline norecurse nounwind uwtable "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "frame-pointer"="none" "less-precise-fpmad"="false" "min-legal-vector-width"="0" "no-infs-fp-math"="false" "no-jump-tables"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
+attributes #4 = { noinline nounwind uwtable "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "frame-pointer"="none" "less-precise-fpmad"="false" "min-legal-vector-width"="0" "no-infs-fp-math"="false" "no-jump-tables"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
+attributes #5 = { nounwind "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "frame-pointer"="none" "less-precise-fpmad"="false" "no-infs-fp-math"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
+attributes #6 = { nofree nounwind }
+attributes #7 = { nounwind }
+
+!llvm.module.flags = !{!0}
+!llvm.ident = !{!1}
+
+!0 = !{i32 1, !"wchar_size", i32 4}
+!1 = !{!"clang version 10.0.1 "}
+!2 = !{!3, !3, i64 0}
+!3 = !{!"int", !4, i64 0}
+!4 = !{!"omnipotent char", !5, i64 0}
+!5 = !{!"Simple C/C++ TBAA"}
