@@ -1,0 +1,1 @@
+Repository of thesis work about loop unroll factor choice. The repository contains majority of the files created and used, the parts that use `myopt` can also be replaced with just using `opt` from Clang. If not, myopt was provided by the following framework from a Compiler Construction course: https://bitbucket.org/vusec/vu-coco-public/src/master/.
