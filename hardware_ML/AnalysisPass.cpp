@@ -152,21 +152,6 @@ namespace {
                         }
                     }
                 }
-
-                // for (auto I = BB->begin(), E = BB->end(); I != E; ++I) {
-                //     for (auto J = BB->begin(); J != E; ++J) {
-                //         if (&*I != &*J) {
-                //             std::unique_ptr<Dependence> infoPtr;
-                //             infoPtr = DI.depends(&*I, &*J, true);
-                //             Dependence *dep = infoPtr.get();
-                //             if (dep != NULL && !dep->isInput()) {
-                //                 if (!dep->isLoopIndependent()) {
-                //                     hasCarriedDependencies = true;
-                //                 }
-                //             }
-                //         }
-                //     }
-                // }
             }
             
             if (SE.getSmallConstantTripCount(L)) {
