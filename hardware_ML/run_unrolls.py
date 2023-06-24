@@ -1,6 +1,10 @@
 import os
 import subprocess
 
+# Put this file in the directory of all benchmark programs' directories in the "ALADDIN/<suite name>/<program name>" folder after installing ALADDIN
+# Also requires a prepared config file in the "example" folder of the benchmark code with all loops having unroll factor set to 1, just like 
+# presented in the example on ALADDIN github page: https://github.com/harvard-acc/ALADDIN
+
 def main():
     programme = os.path.basename(os.getcwd())
     os.chdir(os.getcwd() + "/example")
