@@ -1,8 +1,8 @@
 import subprocess
 import os
 
-# Put this file in the directory of all benchmark programs' directories after creating a
-# manually unrolled .c version of the original .c benchmark program.
+# Put this file in the directory of all benchmark programs' directories ("benchmark_codes") after creating a
+# manually unrolled .c version of the original .c benchmark program (add #pragma unroll x wherever one wants and then save it as "<programme name>_manual.c".
 
 dirs = ["bb_gemm", "fft", "md", "pp_scan", "reduction", "ss_sort", "stencil", "triad"]
 
