@@ -1,7 +1,7 @@
 import subprocess
 import os
 
-# Put this file in the directory of all benchmark programs' directories
+# Put this file in the directory of all benchmark programs' directories ("benchmark_codes")
 
 dirs = ["bb_gemm", "fft", "md", "pp_scan", "reduction", "ss_sort", "stencil", "triad"]
 
