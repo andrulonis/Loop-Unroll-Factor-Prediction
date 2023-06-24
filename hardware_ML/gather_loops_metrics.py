@@ -4,6 +4,7 @@ import subprocess
 # Put this file in the directory of all benchmark programs' directories ("benchmark_codes"), has to be run with
 # the loop-analysis pass registered in opt, myopt is a local wrapper that simply calls the
 # pass and then runs it. Afterwards it prints the changed LLVM code to stdout. So this can 
+# be used to export the metrics in the compact for a csv file way.
 
 def main():
     f = open("metrics_export.txt", "a+")
