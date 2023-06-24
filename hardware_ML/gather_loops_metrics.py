@@ -1,7 +1,7 @@
 import os
 import subprocess
 
-# Put this file in the directory of all benchmark programs' directories, has to be run with
+# Put this file in the directory of all benchmark programs' directories ("benchmark_codes"), has to be run with
 # the loop-analysis pass registered in opt, myopt is a local wrapper that simply calls the
 # pass and then runs it. Afterwards it prints the changed LLVM code to stdout. So this can 
 
