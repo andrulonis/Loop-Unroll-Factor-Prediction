@@ -47,7 +47,7 @@ if args.title:
     plt.title("Execution times of " + args.title)
 # plt.legend(handles=boxplot["boxes"], labels=labels, loc="best", fontsize="medium")
 plt.ylabel("Time [s]")
-plt.ylim(0, None)
+# plt.ylim(0, None)
 plt.xlabel("Unroll factor")
 plt.xticks([1,2,3,4,5,6,7,8,9],["1", "auto", "manual", "2", "4", "8", "16", "32", "64"])
 if args.output:
