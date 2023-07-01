@@ -2,4 +2,8 @@ Repository of the practical part of thesis about loop unroll factor choice in ha
 
 Hardware part relies on the ALADDIN tool from https://github.com/harvard-acc/ALADDIN, it can be installed the simplest as a docker container, all is described in the repository.
 
-Reference: Aladdin: A Pre-RTL, Power-Performance Accelerator Simulator Enabling Large Design Space Exploration of Customized Architectures, Yakun Sophia Shao, Brandon Reagen, Gu-Yeon Wei and David Brooks, International Symposium on Computer Architecture, June, 2014
+Software parts rely on hyperfine tool from https://github.com/sharkdp/hyperfine.
+
+References: 
+- Aladdin: A Pre-RTL, Power-Performance Accelerator Simulator Enabling Large Design Space Exploration of Customized Architectures, Yakun Sophia Shao, Brandon Reagen, Gu-Yeon Wei and David Brooks, International Symposium on Computer Architecture, June, 2014
+- Peter, D. (2023). hyperfine (Version 1.16.1) [Computer software]. https://github.com/sharkdp/hyperfine
