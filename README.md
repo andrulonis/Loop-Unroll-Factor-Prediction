@@ -1,4 +1,4 @@
-# Loop Unroll Factor Choice Thesis
+# Loop Unroll Factor Thesis
 Repository of the practical part of thesis about loop unroll factor choice in hardware design and software compilation. The main framework for LLVM comes from the Compiler Construction course: https://bitbucket.org/vusec/vu-coco-public/src/master. It is primarly used in the hardware part but it also allows for consistency with LLVM version and compilation.
 
 The repository contains the framework and inside there are three main directories inside `framework/LUF`: `hardware_ML`, `software_ML` and `software_clang`, which represent the main three parts of the thesis. 
