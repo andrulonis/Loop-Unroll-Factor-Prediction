@@ -1,0 +1,85 @@
+; ModuleID = 'gemm.c'
+source_filename = "gemm.c"
+target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128"
+target triple = "x86_64-pc-linux-gnu"
+
+; Function Attrs: nofree noinline norecurse nounwind uwtable
+define dso_local void @bbgemm(double* nocapture readonly %host_m1, double* nocapture readonly %host_m2, double* nocapture %host_prod, double* nocapture readnone %m1, double* nocapture readnone %m2, double* nocapture readnone %prod) local_unnamed_addr #0 {
+entry:
+  br label %for.cond1.preheader
+
+for.cond1.preheader:                              ; preds = %entry, %for.inc36
+  %indvars.iv84 = phi i64 [ 0, %entry ], [ %indvars.iv.next85, %for.inc36 ]
+  br label %for.cond4.preheader
+
+for.cond4.preheader:                              ; preds = %for.cond1.preheader, %for.inc33
+  %indvars.iv82 = phi i64 [ 0, %for.cond1.preheader ], [ %indvars.iv.next83, %for.inc33 ]
+  br label %for.cond7.preheader
+
+for.cond7.preheader:                              ; preds = %for.inc30, %for.cond4.preheader
+  %indvars.iv78 = phi i64 [ 0, %for.cond4.preheader ], [ %indvars.iv.next79, %for.inc30 ]
+  %0 = shl nsw i64 %indvars.iv78, 6
+  br label %for.body9
+
+for.body9:                                        ; preds = %for.inc27, %for.cond7.preheader
+  %indvars.iv71 = phi i64 [ 0, %for.cond7.preheader ], [ %indvars.iv.next72, %for.inc27 ]
+  %1 = add nuw nsw i64 %indvars.iv71, %indvars.iv82
+  %2 = shl i64 %1, 6
+  %3 = add nuw nsw i64 %indvars.iv71, %indvars.iv82
+  %4 = add nuw nsw i64 %3, %0
+  %arrayidx = getelementptr inbounds double, double* %host_m1, i64 %4
+  %5 = load double, double* %arrayidx, align 8, !tbaa !2
+  br label %for.body16
+
+for.body16:                                       ; preds = %for.body16, %for.body9
+  %indvars.iv = phi i64 [ 0, %for.body9 ], [ %indvars.iv.next, %for.body16 ]
+  %6 = add nuw nsw i64 %indvars.iv, %indvars.iv84
+  %7 = add nuw nsw i64 %6, %2
+  %arrayidx20 = getelementptr inbounds double, double* %host_m2, i64 %7
+  %8 = load double, double* %arrayidx20, align 8, !tbaa !2
+  %mul21 = fmul double %5, %8
+  %9 = add nuw nsw i64 %indvars.iv, %indvars.iv84
+  %10 = add nuw nsw i64 %9, %0
+  %arrayidx25 = getelementptr inbounds double, double* %host_prod, i64 %10
+  %11 = load double, double* %arrayidx25, align 8, !tbaa !2
+  %add26 = fadd double %11, %mul21
+  store double %add26, double* %arrayidx25, align 8, !tbaa !2
+  %indvars.iv.next = add nuw nsw i64 %indvars.iv, 1
+  %exitcond = icmp eq i64 %indvars.iv.next, 8
+  br i1 %exitcond, label %for.inc27, label %for.body16
+
+for.inc27:                                        ; preds = %for.body16
+  %indvars.iv.next72 = add nuw nsw i64 %indvars.iv71, 1
+  %exitcond77 = icmp eq i64 %indvars.iv.next72, 8
+  br i1 %exitcond77, label %for.inc30, label %for.body9
+
+for.inc30:                                        ; preds = %for.inc27
+  %indvars.iv.next79 = add nuw nsw i64 %indvars.iv78, 1
+  %exitcond81 = icmp eq i64 %indvars.iv.next79, 64
+  br i1 %exitcond81, label %for.inc33, label %for.cond7.preheader
+
+for.inc33:                                        ; preds = %for.inc30
+  %indvars.iv.next83 = add nuw nsw i64 %indvars.iv82, 8
+  %cmp2 = icmp ult i64 %indvars.iv82, 56
+  br i1 %cmp2, label %for.cond4.preheader, label %for.inc36
+
+for.inc36:                                        ; preds = %for.inc33
+  %indvars.iv.next85 = add nuw nsw i64 %indvars.iv84, 8
+  %cmp = icmp ult i64 %indvars.iv84, 56
+  br i1 %cmp, label %for.cond1.preheader, label %for.end38
+
+for.end38:                                        ; preds = %for.inc36
+  ret void
+}
+
+attributes #0 = { nofree noinline norecurse nounwind uwtable "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "frame-pointer"="none" "less-precise-fpmad"="false" "min-legal-vector-width"="0" "no-infs-fp-math"="false" "no-jump-tables"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
+
+!llvm.module.flags = !{!0}
+!llvm.ident = !{!1}
+
+!0 = !{i32 1, !"wchar_size", i32 4}
+!1 = !{!"clang version 10.0.1 "}
+!2 = !{!3, !3, i64 0}
+!3 = !{!"double", !4, i64 0}
+!4 = !{!"omnipotent char", !5, i64 0}
+!5 = !{!"Simple C/C++ TBAA"}

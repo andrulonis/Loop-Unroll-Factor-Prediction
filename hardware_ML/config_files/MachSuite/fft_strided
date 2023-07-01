@@ -1,0 +1,9 @@
+partition,cyclic,host_real,8192,4,1
+partition,cyclic,host_img,8192,4,1
+partition,cyclic,host_real_twid,4096,4,1
+partition,cyclic,host_img_twid,4096,4,1
+
+unrolling,fft,outer,1
+unrolling,fft,inner,1
+
+cycle_time,6

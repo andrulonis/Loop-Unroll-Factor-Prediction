@@ -1,0 +1,9 @@
+partition,cyclic,host_nzval,39520,4,1
+partition,cyclic,host_cols,19760,4,1
+partition,cyclic,host_vec,3952,4,1
+partition,cyclic,host_out,3952,4,1
+
+unrolling,ellpack,ellpack_1,1
+unrolling,ellpack,ellpack_2,1
+
+cycle_time,6

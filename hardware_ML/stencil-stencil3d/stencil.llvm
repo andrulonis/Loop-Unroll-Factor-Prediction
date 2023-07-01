@@ -1,0 +1,183 @@
+; ModuleID = 'stencil.c'
+source_filename = "stencil.c"
+target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128"
+target triple = "x86_64-pc-linux-gnu"
+
+; Function Attrs: nofree noinline norecurse nounwind uwtable
+define dso_local void @stencil3d(i32* nocapture readonly %host_orig, i32* nocapture %host_sol, i32* nocapture readonly %C, i32* nocapture readnone %orig, i32* nocapture readnone %sol) local_unnamed_addr #0 {
+entry:
+  br label %for.cond1.preheader
+
+for.cond1.preheader:                              ; preds = %for.inc20, %entry
+  %indvar = phi i64 [ 0, %entry ], [ %indvar.next, %for.inc20 ]
+  %0 = shl i64 %indvar, 4
+  br label %for.body3
+
+for.body3:                                        ; preds = %for.body3, %for.cond1.preheader
+  %indvars.iv325 = phi i64 [ 0, %for.cond1.preheader ], [ %indvars.iv.next326, %for.body3 ]
+  %1 = add nuw nsw i64 %indvars.iv325, %0
+  %arrayidx = getelementptr inbounds i32, i32* %host_orig, i64 %1
+  %2 = load i32, i32* %arrayidx, align 4, !tbaa !2
+  %arrayidx9 = getelementptr inbounds i32, i32* %host_sol, i64 %1
+  store i32 %2, i32* %arrayidx9, align 4, !tbaa !2
+  %3 = add nuw nsw i64 %indvars.iv325, %0
+  %4 = add nuw nsw i64 %3, 15872
+  %arrayidx14 = getelementptr inbounds i32, i32* %host_orig, i64 %4
+  %5 = load i32, i32* %arrayidx14, align 4, !tbaa !2
+  %arrayidx19 = getelementptr inbounds i32, i32* %host_sol, i64 %4
+  store i32 %5, i32* %arrayidx19, align 4, !tbaa !2
+  %indvars.iv.next326 = add nuw nsw i64 %indvars.iv325, 1
+  %exitcond330 = icmp eq i64 %indvars.iv.next326, 16
+  br i1 %exitcond330, label %for.inc20, label %for.body3
+
+for.inc20:                                        ; preds = %for.body3
+  %indvar.next = add nuw nsw i64 %indvar, 1
+  %exitcond334 = icmp eq i64 %indvar.next, 32
+  br i1 %exitcond334, label %for.cond26.preheader, label %for.cond1.preheader
+
+for.cond26.preheader:                             ; preds = %for.inc20, %for.inc56
+  %indvars.iv320 = phi i64 [ %indvars.iv.next321, %for.inc56 ], [ 1, %for.inc20 ]
+  %6 = shl i64 %indvars.iv320, 9
+  %7 = or i64 %6, 496
+  br label %for.body28
+
+for.body28:                                       ; preds = %for.body28, %for.cond26.preheader
+  %indvars.iv313 = phi i64 [ 0, %for.cond26.preheader ], [ %indvars.iv.next314, %for.body28 ]
+  %8 = add nuw nsw i64 %indvars.iv313, %6
+  %arrayidx34 = getelementptr inbounds i32, i32* %host_orig, i64 %8
+  %9 = load i32, i32* %arrayidx34, align 4, !tbaa !2
+  %arrayidx40 = getelementptr inbounds i32, i32* %host_sol, i64 %8
+  store i32 %9, i32* %arrayidx40, align 4, !tbaa !2
+  %10 = add nuw nsw i64 %indvars.iv313, %7
+  %arrayidx46 = getelementptr inbounds i32, i32* %host_orig, i64 %10
+  %11 = load i32, i32* %arrayidx46, align 4, !tbaa !2
+  %arrayidx52 = getelementptr inbounds i32, i32* %host_sol, i64 %10
+  store i32 %11, i32* %arrayidx52, align 4, !tbaa !2
+  %indvars.iv.next314 = add nuw nsw i64 %indvars.iv313, 1
+  %exitcond317 = icmp eq i64 %indvars.iv.next314, 16
+  br i1 %exitcond317, label %for.inc56, label %for.body28
+
+for.inc56:                                        ; preds = %for.body28
+  %indvars.iv.next321 = add nuw nsw i64 %indvars.iv320, 1
+  %exitcond324 = icmp eq i64 %indvars.iv.next321, 31
+  br i1 %exitcond324, label %for.cond62.preheader, label %for.cond26.preheader
+
+for.cond62.preheader:                             ; preds = %for.inc56, %for.inc92
+  %indvars.iv309 = phi i64 [ %indvars.iv.next310, %for.inc92 ], [ 1, %for.inc56 ]
+  %12 = shl i64 %indvars.iv309, 5
+  br label %for.body64
+
+for.cond95.preheader:                             ; preds = %for.inc92
+  %arrayidx158 = getelementptr inbounds i32, i32* %C, i64 1
+  br label %for.cond98.preheader
+
+for.body64:                                       ; preds = %for.body64, %for.cond62.preheader
+  %indvars.iv303 = phi i64 [ 1, %for.cond62.preheader ], [ %indvars.iv.next304, %for.body64 ]
+  %13 = add nuw nsw i64 %indvars.iv303, %12
+  %14 = shl nsw i64 %13, 4
+  %arrayidx70 = getelementptr inbounds i32, i32* %host_orig, i64 %14
+  %15 = load i32, i32* %arrayidx70, align 4, !tbaa !2
+  %arrayidx76 = getelementptr inbounds i32, i32* %host_sol, i64 %14
+  store i32 %15, i32* %arrayidx76, align 4, !tbaa !2
+  %16 = or i64 %14, 15
+  %arrayidx82 = getelementptr inbounds i32, i32* %host_orig, i64 %16
+  %17 = load i32, i32* %arrayidx82, align 4, !tbaa !2
+  %arrayidx88 = getelementptr inbounds i32, i32* %host_sol, i64 %16
+  store i32 %17, i32* %arrayidx88, align 4, !tbaa !2
+  %indvars.iv.next304 = add nuw nsw i64 %indvars.iv303, 1
+  %exitcond308 = icmp eq i64 %indvars.iv.next304, 31
+  br i1 %exitcond308, label %for.inc92, label %for.body64
+
+for.inc92:                                        ; preds = %for.body64
+  %indvars.iv.next310 = add nuw nsw i64 %indvars.iv309, 1
+  %exitcond312 = icmp eq i64 %indvars.iv.next310, 31
+  br i1 %exitcond312, label %for.cond95.preheader, label %for.cond62.preheader
+
+for.cond98.preheader:                             ; preds = %for.inc173, %for.cond95.preheader
+  %indvars.iv299 = phi i64 [ 1, %for.cond95.preheader ], [ %indvars.iv.next300, %for.inc173 ]
+  %18 = shl i64 %indvars.iv299, 5
+  br label %for.cond101.preheader
+
+for.cond101.preheader:                            ; preds = %for.inc170, %for.cond98.preheader
+  %indvars.iv282 = phi i64 [ 1, %for.cond98.preheader ], [ %indvars.iv.next283, %for.inc170 ]
+  %19 = add nuw nsw i64 %indvars.iv282, %18
+  %20 = shl nsw i64 %19, 4
+  %21 = add nuw nsw i64 %indvars.iv282, %18
+  %22 = shl i64 %21, 4
+  %23 = add nuw nsw i64 %22, 512
+  %24 = add nuw nsw i64 %indvars.iv282, %18
+  %25 = shl i64 %24, 4
+  %26 = add nsw i64 %25, -512
+  %27 = add nuw nsw i64 %indvars.iv282, %18
+  %28 = shl i64 %27, 4
+  %29 = add nuw nsw i64 %28, 16
+  %30 = add nuw nsw i64 %indvars.iv282, %18
+  %31 = shl i64 %30, 4
+  %32 = add nsw i64 %31, -16
+  br label %for.body103
+
+for.body103:                                      ; preds = %for.body103, %for.cond101.preheader
+  %indvars.iv = phi i64 [ 1, %for.cond101.preheader ], [ %indvars.iv.next, %for.body103 ]
+  %33 = add nuw nsw i64 %indvars.iv, %20
+  %arrayidx109 = getelementptr inbounds i32, i32* %host_orig, i64 %33
+  %34 = load i32, i32* %arrayidx109, align 4, !tbaa !2
+  %35 = add nuw nsw i64 %indvars.iv, %23
+  %arrayidx116 = getelementptr inbounds i32, i32* %host_orig, i64 %35
+  %36 = load i32, i32* %arrayidx116, align 4, !tbaa !2
+  %37 = add nuw nsw i64 %indvars.iv, %26
+  %arrayidx122 = getelementptr inbounds i32, i32* %host_orig, i64 %37
+  %38 = load i32, i32* %arrayidx122, align 4, !tbaa !2
+  %add123 = add nsw i32 %38, %36
+  %39 = add nuw nsw i64 %indvars.iv, %29
+  %arrayidx130 = getelementptr inbounds i32, i32* %host_orig, i64 %39
+  %40 = load i32, i32* %arrayidx130, align 4, !tbaa !2
+  %add131 = add nsw i32 %add123, %40
+  %41 = add nuw nsw i64 %indvars.iv, %32
+  %arrayidx138 = getelementptr inbounds i32, i32* %host_orig, i64 %41
+  %42 = load i32, i32* %arrayidx138, align 4, !tbaa !2
+  %add139 = add nsw i32 %add131, %42
+  %indvars.iv.next = add nuw nsw i64 %indvars.iv, 1
+  %43 = add nuw nsw i64 %indvars.iv.next, %20
+  %arrayidx146 = getelementptr inbounds i32, i32* %host_orig, i64 %43
+  %44 = load i32, i32* %arrayidx146, align 4, !tbaa !2
+  %add147 = add nsw i32 %add139, %44
+  %45 = add nuw nsw i64 %indvars.iv, %20
+  %46 = add nsw i64 %45, -1
+  %arrayidx154 = getelementptr inbounds i32, i32* %host_orig, i64 %46
+  %47 = load i32, i32* %arrayidx154, align 4, !tbaa !2
+  %add155 = add nsw i32 %add147, %47
+  %48 = load i32, i32* %C, align 4, !tbaa !2
+  %mul157 = mul nsw i32 %48, %34
+  %49 = load i32, i32* %arrayidx158, align 4, !tbaa !2
+  %mul159 = mul nsw i32 %49, %add155
+  %add160 = add nsw i32 %mul159, %mul157
+  %arrayidx166 = getelementptr inbounds i32, i32* %host_sol, i64 %33
+  store i32 %add160, i32* %arrayidx166, align 4, !tbaa !2
+  %exitcond = icmp eq i64 %indvars.iv.next, 15
+  br i1 %exitcond, label %for.inc170, label %for.body103
+
+for.inc170:                                       ; preds = %for.body103
+  %indvars.iv.next283 = add nuw nsw i64 %indvars.iv282, 1
+  %exitcond298 = icmp eq i64 %indvars.iv.next283, 31
+  br i1 %exitcond298, label %for.inc173, label %for.cond101.preheader
+
+for.inc173:                                       ; preds = %for.inc170
+  %indvars.iv.next300 = add nuw nsw i64 %indvars.iv299, 1
+  %exitcond302 = icmp eq i64 %indvars.iv.next300, 31
+  br i1 %exitcond302, label %for.end175, label %for.cond98.preheader
+
+for.end175:                                       ; preds = %for.inc173
+  ret void
+}
+
+attributes #0 = { nofree noinline norecurse nounwind uwtable "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "frame-pointer"="none" "less-precise-fpmad"="false" "min-legal-vector-width"="0" "no-infs-fp-math"="false" "no-jump-tables"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
+
+!llvm.module.flags = !{!0}
+!llvm.ident = !{!1}
+
+!0 = !{i32 1, !"wchar_size", i32 4}
+!1 = !{!"clang version 10.0.1 "}
+!2 = !{!3, !3, i64 0}
+!3 = !{!"int", !4, i64 0}
+!4 = !{!"omnipotent char", !5, i64 0}
+!5 = !{!"Simple C/C++ TBAA"}

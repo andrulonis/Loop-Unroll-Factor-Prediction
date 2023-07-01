@@ -1,0 +1,11 @@
+partition,cyclic,host_m1,32768,4,1
+partition,cyclic,host_m2,32768,4,1
+partition,cyclic,host_prod,32768,4,1
+
+unrolling,bbgemm,loopjj,1
+unrolling,bbgemm,loopkk,1
+unrolling,bbgemm,loopi,1
+unrolling,bbgemm,loopk,1
+unrolling,bbgemm,loopj,1
+
+cycle_time,6

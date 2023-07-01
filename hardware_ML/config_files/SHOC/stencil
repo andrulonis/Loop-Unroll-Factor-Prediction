@@ -1,0 +1,8 @@
+partition,cyclic,orig,8192,4,1
+partition,cyclic,sol,8192,4,1
+partition,cyclic,filter,8192,4,1
+
+unrolling,stencil,outer,1
+unrolling,stencil,inner,1
+
+cycle_time,6

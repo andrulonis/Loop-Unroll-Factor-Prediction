@@ -1,0 +1,63 @@
+; ModuleID = 'gemm.c'
+source_filename = "gemm.c"
+target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128"
+target triple = "x86_64-pc-linux-gnu"
+
+; Function Attrs: nofree noinline norecurse nounwind uwtable
+define dso_local void @gemm(double* nocapture readonly %host_m1, double* nocapture readonly %host_m2, double* nocapture %host_prod, double* nocapture readnone %m1, double* nocapture readnone %m2, double* nocapture readnone %prod) local_unnamed_addr #0 {
+entry:
+  br label %for.cond1.preheader
+
+for.cond1.preheader:                              ; preds = %for.inc19, %entry
+  %indvars.iv49 = phi i64 [ 0, %entry ], [ %indvars.iv.next50, %for.inc19 ]
+  %0 = shl nsw i64 %indvars.iv49, 6
+  br label %for.body3
+
+for.body3:                                        ; preds = %for.end, %for.cond1.preheader
+  %indvars.iv45 = phi i64 [ 0, %for.cond1.preheader ], [ %indvars.iv.next46, %for.end ]
+  br label %for.body6
+
+for.body6:                                        ; preds = %for.body6, %for.body3
+  %indvars.iv = phi i64 [ 0, %for.body3 ], [ %indvars.iv.next, %for.body6 ]
+  %sum.039 = phi double [ 0.000000e+00, %for.body3 ], [ %add12, %for.body6 ]
+  %1 = shl i64 %indvars.iv, 6
+  %2 = add nuw nsw i64 %indvars.iv, %0
+  %arrayidx = getelementptr inbounds double, double* %host_m1, i64 %2
+  %3 = load double, double* %arrayidx, align 8, !tbaa !2
+  %4 = add nuw nsw i64 %1, %indvars.iv45
+  %arrayidx10 = getelementptr inbounds double, double* %host_m2, i64 %4
+  %5 = load double, double* %arrayidx10, align 8, !tbaa !2
+  %mul11 = fmul double %3, %5
+  %add12 = fadd double %sum.039, %mul11
+  %indvars.iv.next = add nuw nsw i64 %indvars.iv, 1
+  %exitcond = icmp eq i64 %indvars.iv.next, 64
+  br i1 %exitcond, label %for.end, label %for.body6
+
+for.end:                                          ; preds = %for.body6
+  %6 = add nuw nsw i64 %indvars.iv45, %0
+  %arrayidx15 = getelementptr inbounds double, double* %host_prod, i64 %6
+  store double %add12, double* %arrayidx15, align 8, !tbaa !2
+  %indvars.iv.next46 = add nuw nsw i64 %indvars.iv45, 1
+  %exitcond48 = icmp eq i64 %indvars.iv.next46, 64
+  br i1 %exitcond48, label %for.inc19, label %for.body3
+
+for.inc19:                                        ; preds = %for.end
+  %indvars.iv.next50 = add nuw nsw i64 %indvars.iv49, 1
+  %exitcond52 = icmp eq i64 %indvars.iv.next50, 64
+  br i1 %exitcond52, label %for.end21, label %for.cond1.preheader
+
+for.end21:                                        ; preds = %for.inc19
+  ret void
+}
+
+attributes #0 = { nofree noinline norecurse nounwind uwtable "correctly-rounded-divide-sqrt-fp-math"="false" "disable-tail-calls"="false" "frame-pointer"="none" "less-precise-fpmad"="false" "min-legal-vector-width"="0" "no-infs-fp-math"="false" "no-jump-tables"="false" "no-nans-fp-math"="false" "no-signed-zeros-fp-math"="false" "no-trapping-math"="false" "stack-protector-buffer-size"="8" "target-cpu"="x86-64" "target-features"="+cx8,+fxsr,+mmx,+sse,+sse2,+x87" "unsafe-fp-math"="false" "use-soft-float"="false" }
+
+!llvm.module.flags = !{!0}
+!llvm.ident = !{!1}
+
+!0 = !{i32 1, !"wchar_size", i32 4}
+!1 = !{!"clang version 10.0.1 "}
+!2 = !{!3, !3, i64 0}
+!3 = !{!"double", !4, i64 0}
+!4 = !{!"omnipotent char", !5, i64 0}
+!5 = !{!"Simple C/C++ TBAA"}

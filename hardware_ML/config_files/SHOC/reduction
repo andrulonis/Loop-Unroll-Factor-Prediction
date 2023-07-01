@@ -1,0 +1,5 @@
+partition,cyclic,in,8192,4,1
+
+unrolling,reduction,sum,1
+
+cycle_time,6

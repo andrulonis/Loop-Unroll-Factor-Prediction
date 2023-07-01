@@ -1,8 +1,6 @@
 import subprocess
 import os
 
-# Put this file in the directory of all benchmark programs' directories ("benchmark_codes")
-
 for dir in os.listdir(os.getcwd()):
     dirname = os.fsdecode(dir)
     if os.path.isdir(dirname):

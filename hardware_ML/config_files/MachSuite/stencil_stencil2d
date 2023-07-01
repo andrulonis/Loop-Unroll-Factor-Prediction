@@ -1,0 +1,12 @@
+partition,cyclic,orig,32768,4,1
+partition,cyclic,sol,32768,4,1
+partition,cyclic,host_orig,32768,4,1
+partition,cyclic,host_sol,32768,4,1
+partition,cyclic,filter,36,4,1
+
+unrolling,stencil,stencil_label1,1
+unrolling,stencil,stencil_label2,1
+unrolling,stencil,stencil_label3,1
+unrolling,stencil,stencil_label4,1
+
+cycle_time,6

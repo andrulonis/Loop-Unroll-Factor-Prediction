@@ -1,0 +1,17 @@
+partition,cyclic,orig,65536,4,1
+partition,cyclic,sol,65536,4,1
+partition,cyclic,host_orig,65536,4,1
+partition,cyclic,host_sol,65536,4,1
+partition,cyclic,C,8,4,1
+
+unrolling,stencil3d,height_bound_col,1
+unrolling,stencil3d,height_bound_row,1
+unrolling,stencil3d,col_bound_height,1
+unrolling,stencil3d,col_bound_row,1
+unrolling,stencil3d,row_bound_height,1
+unrolling,stencil3d,row_bound_col,1
+unrolling,stencil3d,loop_height,1
+unrolling,stencil3d,loop_col,1
+unrolling,stencil3d,loop_row,1
+
+cycle_time,6

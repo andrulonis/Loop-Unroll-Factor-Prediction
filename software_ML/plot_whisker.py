@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 # File from https://github.com/sharkdp/hyperfine repository
-# Put this file in the directory of all benchmark programs' directories ("benchmark_codes"), next to the "hyperfine_analysis_ML.py" file
 
 """This program shows `hyperfine` benchmark results as a box and whisker plot.
 

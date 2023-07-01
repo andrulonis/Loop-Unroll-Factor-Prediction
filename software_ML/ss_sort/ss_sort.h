@@ -1,0 +1,16 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define TYPE int
+
+#define N 8388608//2048
+#define NUMOFBLOCKS 131072//512
+
+#define ELEMENTSPERBLOCK 128//4
+#define RADIXSIZE 128//4
+#define BUCKETSIZE NUMOFBLOCKS*RADIXSIZE
+#define MASK 0x9//0x3
+//SCAN_BLOCK * SCAN_RADIX = BUCKETSIZE
+
+#define SCAN_BLOCK 32//16
+#define SCAN_RADIX BUCKETSIZE/SCAN_BLOCK
