@@ -444,7 +444,7 @@ attributes #1 = { nounwind readnone speculatable willreturn }
 !llvm.ident = !{!6}
 
 !0 = distinct !DICompileUnit(language: DW_LANG_C99, file: !1, producer: "clang version 10.0.1 ", isOptimized: false, runtimeVersion: 0, emissionKind: FullDebug, enums: !2, splitDebugInlining: false, nameTableKind: None)
-!1 = !DIFile(filename: "viterbi.c", directory: "/home/coco/work/benchmark_codes/viterbi")
+!1 = !DIFile(filename: "viterbi.c", directory: "/home/coco/work/LUF/hardware_ML/gather_loops_metrics/viterbi")
 !2 = !{}
 !3 = !{i32 7, !"Dwarf Version", i32 4}
 !4 = !{i32 2, !"Debug Info Version", i32 3}
@@ -456,7 +456,7 @@ attributes #1 = { nounwind readnone speculatable willreturn }
 !10 = !DIBasicType(name: "int", size: 32, encoding: DW_ATE_signed)
 !11 = !DIDerivedType(tag: DW_TAG_pointer_type, baseType: !12, size: 64)
 !12 = !DIDerivedType(tag: DW_TAG_typedef, name: "prob_t", file: !13, line: 14, baseType: !14)
-!13 = !DIFile(filename: "./viterbi.h", directory: "/home/coco/work/benchmark_codes/viterbi")
+!13 = !DIFile(filename: "./viterbi.h", directory: "/home/coco/work/LUF/hardware_ML/gather_loops_metrics/viterbi")
 !14 = !DIBasicType(name: "double", size: 64, encoding: DW_ATE_float)
 !15 = !DIDerivedType(tag: DW_TAG_pointer_type, baseType: !16, size: 64)
 !16 = !DIDerivedType(tag: DW_TAG_typedef, name: "state_t", file: !13, line: 15, baseType: !17)

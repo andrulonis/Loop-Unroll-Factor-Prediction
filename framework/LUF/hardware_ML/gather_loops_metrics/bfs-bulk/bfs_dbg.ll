@@ -255,7 +255,7 @@ attributes #1 = { nounwind readnone speculatable willreturn }
 !llvm.ident = !{!6}
 
 !0 = distinct !DICompileUnit(language: DW_LANG_C99, file: !1, producer: "clang version 10.0.1 ", isOptimized: false, runtimeVersion: 0, emissionKind: FullDebug, enums: !2, splitDebugInlining: false, nameTableKind: None)
-!1 = !DIFile(filename: "bfs.c", directory: "/home/coco/work/benchmark_codes/bfs-bulk")
+!1 = !DIFile(filename: "bfs.c", directory: "/home/coco/work/LUF/hardware_ML/gather_loops_metrics/bfs-bulk")
 !2 = !{}
 !3 = !{i32 7, !"Dwarf Version", i32 4}
 !4 = !{i32 2, !"Debug Info Version", i32 3}
@@ -266,7 +266,7 @@ attributes #1 = { nounwind readnone speculatable willreturn }
 !9 = !{null, !10, !23, !29, !35, !10, !23, !29, !35, !28}
 !10 = !DIDerivedType(tag: DW_TAG_pointer_type, baseType: !11, size: 64)
 !11 = !DIDerivedType(tag: DW_TAG_typedef, name: "node_t", file: !12, line: 38, baseType: !13)
-!12 = !DIFile(filename: "./bfs.h", directory: "/home/coco/work/benchmark_codes/bfs-bulk")
+!12 = !DIFile(filename: "./bfs.h", directory: "/home/coco/work/LUF/hardware_ML/gather_loops_metrics/bfs-bulk")
 !13 = distinct !DICompositeType(tag: DW_TAG_structure_type, name: "node_t_struct", file: !12, line: 35, size: 128, elements: !14)
 !14 = !{!15, !22}
 !15 = !DIDerivedType(tag: DW_TAG_member, name: "edge_begin", scope: !13, file: !12, line: 36, baseType: !16, size: 64)
